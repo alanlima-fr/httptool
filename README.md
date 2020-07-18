@@ -12,6 +12,7 @@ code, length and whether the header has been written.
 [![Build Status](https://travis-ci.org/nanoninja/httptool.svg)](https://travis-ci.org/nanoninja/httptool) 
 [![Coverage Status](https://coveralls.io/repos/github/nanoninja/httptool/badge.svg?branch=master)](https://coveralls.io/github/nanoninja/httptool?branch=master) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/nanoninja/httptool)](https://goreportcard.com/report/github.com/nanoninja/httptool)
+[![codebeat badge](https://codebeat.co/badges/0ce06064-931b-41ba-b29e-dcfbb6c577f3)](https://codebeat.co/projects/github-com-nanoninja-httptool-master)
 
 ## Installation
 

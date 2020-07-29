@@ -221,7 +221,7 @@ func TestResponseWriterHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://www.example.com", nil)
 
-	handler = ResponseWriterHandler(handler)
+	handler = ResponseHandler(handler)
 	handler.ServeHTTP(w, r)
 
 	equal(t, http.StatusFound, w.Code)

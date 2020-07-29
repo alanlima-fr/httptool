@@ -119,10 +119,3 @@ func (w *responseWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 	w.wroteHeader = true
 }
-
-// ResponseWriterHandler is a http.handler that extends the http.ResponseWriter written in Go.
-func ResponseWriterHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.ServeHTTP(NewResponseWriter(w), r)
-	})
-}

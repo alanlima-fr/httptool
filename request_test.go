@@ -10,8 +10,21 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
+
+func TestDecodeJSON(t *testing.T) {
+	v := struct {
+		Name string `json:"name"`
+	}{}
+
+	body := `{"name": "Gopher"}`
+	r := httptest.NewRequest(http.MethodPost, "http://www.example.com", strings.NewReader(body))
+
+	equal(t, nil, DecodeJSON(r, &v))
+	equal(t, "Gopher", v.Name)
+}
 
 func TestClientIP(t *testing.T) {
 	newRequest := func(remoteAddr, xRealIP string, xForwardedFor ...string) *http.Request {

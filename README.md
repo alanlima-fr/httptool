@@ -67,7 +67,7 @@ func main() {
 	mux.Handle("/", handleError(logger, index))
 
 	server := httptool.Recovery{
-		Next:   httptool.ResponseWriterHandler(logRequest(mux)),
+		Next:   httptool.ResponseHandler(logRequest(mux)),
 		Logger: logger,
 	}
 

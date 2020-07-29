@@ -210,7 +210,7 @@ func TestResponseWriterPushErrorNotSupported(t *testing.T) {
 	equal(t, http.ErrNotSupported, err)
 }
 
-func TestResponseWriterHandler(t *testing.T) {
+func TestResponseHandler(t *testing.T) {
 	var handler http.Handler
 
 	handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

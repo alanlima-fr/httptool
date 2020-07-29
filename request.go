@@ -5,10 +5,16 @@
 package httptool
 
 import (
+	"encoding/json"
 	"net"
 	"net/http"
 	"strings"
 )
+
+// DecodeJSON reads the body of an HTTP request looking for a JSON document.
+func DecodeJSON(r *http.Request, v interface{}) error {
+	return json.NewDecoder(r.Body).Decode(v)
+}
 
 // ClientIP returns the client's IP address.
 func ClientIP(r *http.Request) net.IP {

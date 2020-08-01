@@ -20,11 +20,6 @@ func equal(t *testing.T, expected, actual interface{}) {
 	}
 }
 
-func TestError(t *testing.T) {
-	e := Error("test error")
-	equal(t, "test error", e.Error())
-}
-
 func TestHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://www.example.com", nil)
@@ -40,33 +35,24 @@ func TestHandler(t *testing.T) {
 	equal(t, http.StatusOK, w.Code)
 }
 
-func TestChain(t *testing.T) {
+func TestChainFunc(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://www.example.com", nil)
 
-	handler := func(next Handler) Handler {
+	middleware := func(next Handler) Handler {
 		return HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 			return next.ServeHTTP(w, r)
 		})
 	}
 
-	t.Run("WithNoError", func(t *testing.T) {
-		h := func(w http.ResponseWriter, _ *http.Request) error {
-			w.WriteHeader(http.StatusInternalServerError)
-			return nil
-		}
+	h := func(w http.ResponseWriter, _ *http.Request) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
 
-		c := NewChain(handler)
-		err := c.ThenFunc(h).ServeHTTP(w, r)
+	mw := ChainFunc(h, middleware)
+	err := mw.ServeHTTP(w, r)
 
-		equal(t, nil, err)
-		equal(t, http.StatusInternalServerError, w.Code)
-	})
-
-	t.Run("WithErrNoHandlerProvided", func(t *testing.T) {
-		c := NewChain(handler)
-		err := c.Then(nil).ServeHTTP(w, r)
-
-		equal(t, ErrNoHandlerProvided, err)
-	})
+	equal(t, nil, err)
+	equal(t, http.StatusOK, w.Code)
 }

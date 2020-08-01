@@ -12,7 +12,7 @@ import (
 	"github.com/nanoninja/httptool"
 )
 
-func ExampleNewChain() {
+func ExampleMiddleware() {
 	middleware := func(next httptool.Handler) httptool.Handler {
 		return httptool.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 			fmt.Println("Middleware")
@@ -25,10 +25,10 @@ func ExampleNewChain() {
 		return err
 	}
 
-	c := httptool.NewChain(middleware).ThenFunc(index)
+	mw := httptool.ChainFunc(index, middleware)
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := c.ServeHTTP(w, r); err != nil {
+		if err := mw.ServeHTTP(w, r); err != nil {
 			fmt.Println("Error:", err.Error())
 		}
 	})

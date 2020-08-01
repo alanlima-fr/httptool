@@ -60,17 +60,17 @@ func greeting(w http.ResponseWriter, _ *http.Request) error {
 }
 
 func main() {
-	errLogger := log.New(os.Stderr, "", log.Lshortfile)
+    errLogger := log.New(os.Stderr, "", log.Lshortfile)
     accessLogger := log.New(os.Stdout, "", log.Lshortfile)
-
-	mux := http.NewServeMux()
-	mux.Handle("/", logError(greeting, errLogger))
- 
+    
+    mux := http.NewServeMux()
+    mux.Handle("/", logError(greeting, errLogger))
+    
     handler := logAccess(mux, accessLogger)
     handler = httptool.ResponseHandler(handler)
     handler = httptool.RecoveryHandler(handler, errLogger)
-
-	log.Fatalln(http.ListenAndServe(":3000", handler))
+    
+    log.Fatalln(http.ListenAndServe(":3000", handler))
 }
 ```
 

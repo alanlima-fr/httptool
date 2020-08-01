@@ -28,6 +28,20 @@ func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return f(w, r)
 }
 
+// RecoveryHandler is an http.Handler that recovers from all panics.
+func RecoveryHandler(next http.Handler, logger Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Printf("%v", err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // Middleware describes a middleware that can be applied to a httptool.handler.
 type Middleware func(Handler) Handler
 

@@ -26,7 +26,6 @@ go get github.com/nanoninja/httptool
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -34,26 +33,26 @@ import (
 	"github.com/nanoninja/httptool"
 )
 
-func logRequest(next http.Handler) http.Handler {
+func logAccess(next http.Handler, logger *log.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
 
-		rw := w.(httptool.ResponseWriter)
 		ip := httptool.ClientIP(r)
+		rw := w.(httptool.ResponseWriter)
 
-		log.Printf("[nanoninja] %s %s %s %d\n", ip, r.Method, r.RequestURI, rw.Status())
+		logger.Printf("[nanoninja] %s %s %s %d\n", ip, r.Method, r.RequestURI, rw.Status())
 	})
 }
 
-func handleError(logger *log.Logger, h httptool.HandlerFunc) http.HandlerFunc {
+func logError(next httptool.HandlerFunc, logger *log.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := h.ServeHTTP(w, r); err != nil {
+		if err := next.ServeHTTP(w, r); err != nil {
 			logger.Println(err)
 		}
 	}
 }
 
-func index(w http.ResponseWriter, _ *http.Request) error {
+func greeting(w http.ResponseWriter, _ *http.Request) error {
 	w.WriteHeader(http.StatusOK)
 
 	_, err := w.Write([]byte("Hello, Gophers"))
@@ -61,17 +60,17 @@ func index(w http.ResponseWriter, _ *http.Request) error {
 }
 
 func main() {
-	logger := log.New(os.Stderr, "", log.Lshortfile)
+	errLogger := log.New(os.Stderr, "", log.Lshortfile)
+    accessLogger := log.New(os.Stdout, "", log.Lshortfile)
 
 	mux := http.NewServeMux()
-	mux.Handle("/", handleError(logger, index))
+	mux.Handle("/", logError(greeting, errLogger))
+ 
+    handler := logAccess(mux, accessLogger)
+    handler = httptool.ResponseHandler(handler)
+    handler = httptool.RecoveryHandler(handler, errLogger)
 
-	server := httptool.Recovery{
-		Next:   httptool.ResponseHandler(logRequest(mux)),
-		Logger: logger,
-	}
-
-	log.Fatalln(http.ListenAndServe(":3000", server))
+	log.Fatalln(http.ListenAndServe(":3000", handler))
 }
 ```
 

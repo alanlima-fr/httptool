@@ -5,8 +5,10 @@
 package httptool
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -33,6 +35,42 @@ func TestHandler(t *testing.T) {
 
 	equal(t, nil, err)
 	equal(t, http.StatusOK, w.Code)
+}
+
+type loggerTest struct {
+	logged bool
+	value  string
+}
+
+func (l *loggerTest) Printf(format string, v ...interface{}) {
+	l.logged = true
+	l.value = fmt.Sprintf(format, v...)
+}
+
+func TestRecoveryHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://www.example.com", nil)
+
+	handlerTest := func(w http.ResponseWriter, r *http.Request) {
+		panic("errors are values")
+	}
+
+	logger := &loggerTest{}
+	recovery := RecoveryHandler(http.HandlerFunc(handlerTest), logger)
+
+	t.Run("NotLoggedPanic", func(t *testing.T) {
+		equal(t, false, logger.logged)
+		equal(t, "", logger.value)
+	})
+
+	recovery.ServeHTTP(w, r)
+
+	t.Run("LoggedPanic", func(t *testing.T) {
+		equal(t, true, logger.logged)
+		equal(t, "errors are values", logger.value)
+		equal(t, http.StatusInternalServerError, w.Code)
+		equal(t, true, strings.Contains(w.Body.String(), http.StatusText(http.StatusInternalServerError)))
+	})
 }
 
 func TestChainFunc(t *testing.T) {

@@ -11,11 +11,6 @@ import (
 	"strings"
 )
 
-// DecodeJSON reads the body of an HTTP request looking for a JSON document.
-func DecodeJSON(r *http.Request, v interface{}) error {
-	return json.NewDecoder(r.Body).Decode(v)
-}
-
 // ClientIP returns the client's IP address.
 func ClientIP(r *http.Request) net.IP {
 	for _, addr := range []string{"X-Real-IP", "X-Forwarded-For"} {
@@ -33,6 +28,21 @@ func ClientIP(r *http.Request) net.IP {
 	return ParseIP(r.RemoteAddr)
 }
 
+// DecodeJSON reads the body of an HTTP request looking for a JSON document.
+func DecodeJSON(r *http.Request, v interface{}) error {
+	return json.NewDecoder(r.Body).Decode(v)
+}
+
+// IsSecure returns whether is https secure request.
+func IsSecure(r *http.Request) bool {
+	return r.TLS != nil
+}
+
+// IsXMLHTTPRequest returns whether is the request a Javascript XMLHttpRequest.
+func IsXMLHTTPRequest(r *http.Request) bool {
+	return r.Header.Get("X-Requested-With") == "XMLHttpRequest"
+}
+
 // ParseIP checks if the IP is valid.
 func ParseIP(ip string) net.IP {
 	ip = strings.TrimSpace(ip)
@@ -46,14 +56,4 @@ func ParseIP(ip string) net.IP {
 	}
 
 	return net.ParseIP(ip)
-}
-
-// IsSecure returns whether is https secure request.
-func IsSecure(r *http.Request) bool {
-	return r.TLS != nil
-}
-
-// IsXMLHTTPRequest returns whether is the request a Javascript XMLHttpRequest.
-func IsXMLHTTPRequest(r *http.Request) bool {
-	return r.Header.Get("X-Requested-With") == "XMLHttpRequest"
 }

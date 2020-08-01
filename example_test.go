@@ -25,10 +25,10 @@ func ExampleMiddleware() {
 		return err
 	}
 
-	mw := httptool.ChainFunc(index, middleware)
+	handler := httptool.ChainFunc(index, middleware)
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := mw.ServeHTTP(w, r); err != nil {
+		if err := handler.ServeHTTP(w, r); err != nil {
 			fmt.Println("Error:", err.Error())
 		}
 	})
